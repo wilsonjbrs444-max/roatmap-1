@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Academy – 30 Jours</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Clash+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090f;
+  --card: #0d1117;
+  --border: #1c2333;
+  --border2: #243044;
+  --py: #60a5fa;
+  --py-dim: rgba(96,165,250,0.12);
+  --db: #34d399;
+  --db-dim: rgba(52,211,153,0.12);
+  --cloud: #fbbf24;
+  --cloud-dim: rgba(251,191,36,0.12);
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --text3: #4a5568;
+  --success: #34d399;
+  --r: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── VIEWS ── */
+.view{display:none;animation:fadeIn .3s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════
+   HOME VIEW
+══════════════════════ */
+#home{padding:0 0 80px}
+.home-hero{
+  padding:60px 20px 40px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.home-hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%,rgba(96,165,250,.08),transparent),
+    radial-gradient(ellipse 60% 50% at 80% 50%,rgba(251,191,36,.06),transparent);
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--text2);
+  border:1px solid var(--border2);
+  padding:5px 14px;border-radius:99px;margin-bottom:20px;
+  letter-spacing:.5px;
+}
+.hero-title{
+  font-family:'Outfit',sans-serif;
+  font-size:clamp(32px,7vw,58px);
+  font-weight:700;line-height:1.1;
+  letter-spacing:-1px;margin-bottom:16px;
+}
+.hero-title em{font-style:normal;color:var(--py)}
+.hero-sub{color:var(--text2);font-size:16px;max-width:420px;margin:0 auto 36px;line-height:1.7}
+
+/* global progress */
+.global-prog{
+  max-width:520px;margin:0 auto 40px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px 24px;
+}
+.gp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.gp-label{font-weight:600;font-size:14px}
+.gp-count{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--py)}
+.gp-track{height:8px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.gp-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--py),var(--db),var(--cloud));transition:width .6s ease}
+.gp-pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 10px;border-radius:99px;border:1px solid var(--border)}
+.pill.py{color:var(--py);border-color:rgba(96,165,250,.3)}
+.pill.db{color:var(--db);border-color:rgba(52,211,153,.3)}
+.pill.cloud{color:var(--cloud);border-color:rgba(251,191,36,.3)}
+
+/* day grid */
+.days-grid{
+  max-width:760px;margin:0 auto;padding:0 16px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;
+}
+.day-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;cursor:pointer;
+  transition:border-color .2s,transform .15s,box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.day-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.day-card.completed{border-color:rgba(52,211,153,.4)}
+.day-card.active-day{border-color:var(--py);box-shadow:0 0 0 1px var(--py)}
+.day-card.locked{opacity:.5;cursor:default}
+.day-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:6px}
+.day-title{font-size:14px;font-weight:600;line-height:1.3;margin-bottom:10px}
+.day-modules{display:flex;gap:6px}
+.day-mod{width:8px;height:8px;border-radius:2px;background:var(--border)}
+.day-mod.py{background:var(--py)}
+.day-mod.db{background:var(--db)}
+.day-mod.cloud{background:var(--cloud)}
+.day-mod.done{opacity:.4}
+.day-check{
+  position:absolute;top:12px;right:12px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--db);display:flex;align-items:center;justify-content:center;
+  font-size:11px;display:none;
+}
+.day-card.completed .day-check{display:flex}
+
+/* ══════════════════════
+   DAY VIEW
+══════════════════════ */
+#day-view{padding:0 0 80px;max-width:800px;margin:0 auto}
+.back-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:20px 20px 0;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+  color:var(--text2);cursor:pointer;border:none;background:none;
+  transition:color .2s;
+}
+.back-btn:hover{color:var(--text)}
+.day-header{padding:20px 20px 24px}
+.day-header-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.day-badge{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:var(--py);border:1px solid rgba(96,165,250,.3);
+  padding:4px 10px;border-radius:99px;
+}
+.day-header h2{font-size:clamp(20px,4vw,28px);font-weight:700;line-height:1.2}
+.day-header p{color:var(--text2);font-size:14px;margin-top:6px;line-height:1.6}
+
+/* module tabs */
+.mod-tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  padding:0 20px;
+  overflow-x:auto;
+}
+.mod-tab{
+  padding:12px 20px;font-size:14px;font-weight:600;
+  cursor:pointer;border:none;background:none;color:var(--text2);
+  border-bottom:2px solid transparent;transition:all .2s;
+  white-space:nowrap;display:flex;align-items:center;gap:8px;
+  position:relative;top:1px;
+}
+.mod-tab:hover{color:var(--text)}
+.mod-tab.py.active{color:var(--py);border-color:var(--py)}
+.mod-tab.db.active{color:var(--db);border-color:var(--db)}
+.mod-tab.cloud.active{color:var(--cloud);border-color:var(--cloud)}
+.mod-tab .tab-dot{width:7px;height:7px;border-radius:50%}
+.mod-tab.py .tab-dot{background:var(--py)}
+.mod-tab.db .tab-dot{background:var(--db)}
+.mod-tab.cloud .tab-dot{background:var(--cloud)}
+.mod-tab .tab-check{font-size:12px;color:var(--db)}
+
+/* lesson panel */
+.lesson-panel{display:none;padding:24px 20px 0}
+.lesson-panel.active{display:block}
+
+.lesson-meta{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:20px;flex-wrap:wrap;
+}
+.lm-time{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:var(--text2);background:var(--border);
+  padding:4px 10px;border-radius:6px;
+}
+.lm-level{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  padding:4px 10px;border-radius:6px;
+}
+.lm-level.debutant{background:rgba(52,211,153,.1);color:var(--db)}
+.lm-level.intermediaire{background:rgba(251,191,36,.1);color:var(--cloud)}
+
+/* course content */
+.course-content{line-height:1.8;font-size:15px}
+.course-content h3{
+  font-size:18px;font-weight:700;margin:28px 0 12px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.course-content h4{font-size:15px;font-weight:600;margin:20px 0 8px;color:var(--text2)}
+.course-content p{margin-bottom:14px;color:#c9d1d9}
+.course-content ul,.course-content ol{padding-left:20px;margin-bottom:14px}
+.course-content li{margin-bottom:6px;color:#c9d1d9}
+.course-content strong{color:var(--text);font-weight:600}
+
+/* code blocks */
+.code-block{
+  background:#0d1117;border:1px solid var(--border2);
+  border-radius:8px;margin:16px 0;overflow:hidden;
+}
+.code-block-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--border);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);
+}
+.code-block-lang{color:var(--py)}
+.code-block pre{
+  padding:16px;overflow-x:auto;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;
+  line-height:1.7;color:#e6edf3;
+}
+.code-block code{background:none;padding:0}
+
+/* inline code */
+code{
+  background:var(--border);color:var(--py);
+  padding:2px 6px;border-radius:4px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;
+}
+
+/* info boxes */
+.info-box{
+  border-radius:8px;padding:16px 18px;margin:16px 0;
+  border-left:3px solid;
+}
+.info-box.tip{background:rgba(96,165,250,.06);border-color:var(--py)}
+.info-box.tip .ib-title{color:var(--py)}
+.info-box.warning{background:rgba(251,191,36,.06);border-color:var(--cloud)}
+.info-box.warning .ib-title{color:var(--cloud)}
+.info-box.practice{background:rgba(52,211,153,.06);border-color:var(--db)}
+.info-box.practice .ib-title{color:var(--db)}
+.ib-title{font-weight:700;font-size:13px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.ib-body{font-size:14px;color:#c9d1d9;line-height:1.7}
+
+/* complete button */
+.complete-wrap{
+  margin-top:36px;padding:24px 20px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.complete-btn{
+  padding:12px 28px;border-radius:8px;border:none;
+  font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.complete-btn.py{background:var(--py);color:#000}
+.complete-btn.py:hover{background:#93c5fd}
+.complete-btn.db{background:var(--db);color:#000}
+.complete-btn.db:hover{background:#6ee7b7}
+.complete-btn.cloud{background:var(--cloud);color:#000}
+.complete-btn.cloud:hover{background:#fcd34d}
+.complete-btn:disabled{opacity:.5;cursor:default}
+.complete-btn.done-btn{background:var(--border);color:var(--text2);cursor:default}
+
+.next-mod-hint{font-size:13px;color:var(--text2);font-family:'IBM Plex Mono',monospace}
+
+/* day complete banner */
+.day-complete-banner{
+  margin:24px 20px 0;
+  background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);
+  border-radius:var(--r);padding:20px;
+  display:none;text-align:center;
+}
+.day-complete-banner.show{display:block}
+.dcb-icon{font-size:32px;margin-bottom:8px}
+.dcb-title{font-size:18px;font-weight:700;color:var(--db);margin-bottom:6px}
+.dcb-sub{font-size:14px;color:var(--text2)}
+.dcb-next{
+  margin-top:16px;padding:10px 24px;
+  border-radius:8px;border:none;background:var(--db);color:#000;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.dcb-next:hover{background:#6ee7b7}
+</style>
+</head>
+<body>
+
+<!-- ══ HOME ══ -->
+<div id="home" class="view active">
+  <div class="home-hero">
+    <div class="hero-badge">🎓 Wilson · Tech Academy · 30 Jours</div>
+    <h1 class="hero-title">Apprends <em>3 techs</em><br>chaque jour</h1>
+    <p class="hero-sub">1h Python · 1h Base de données · 1h Cloud — tous les jours pendant 30 jours.</p>
+  </div>
+
+  <div class="global-prog" style="max-width:520px;margin:0 auto 32px">
+    <div class="gp-top">
+      <span class="gp-label">Progression globale</span>
+      <span class="gp-count" id="gp-count">0/90 modules</span>
+    </div>
+    <div class="gp-track"><div class="gp-fill" id="gp-fill" style="width:0%"></div></div>
+    <div class="gp-pills">
+      <span class="pill py" id="pill-py">🐍 Python : 0/30</span>
+      <span class="pill db" id="pill-db">🗄️ DB : 0/30</span>
+      <span class="pill cloud" id="pill-cloud">☁️ Cloud : 0/30</span>
+    </div>
+  </div>
+
+  <div class="days-grid" id="days-grid"></div>
+</div>
+
+<!-- ══ DAY VIEW ══ -->
+<div id="day-view" class="view">
+  <button class="back-btn" onclick="goHome()">← Retour aux 30 jours</button>
+
+  <div class="day-header">
+    <div class="day-header-top">
+      <span class="day-badge" id="dv-badge">Jour 1</span>
+    </div>
+    <h2 id="dv-title"></h2>
+    <p id="dv-desc"></p>
+  </div>
+
+  <div class="day-complete-banner" id="day-banner">
+    <div class="dcb-icon">🎉</div>
+    <div class="dcb-title">Journée complète !</div>
+    <div class="dcb-sub">Tu as terminé les 3 modules du jour. Continue comme ça !</div>
+    <button class="dcb-next" id="banner-next-btn">Jour suivant →</button>
+  </div>
+
+  <div class="mod-tabs" id="mod-tabs"></div>
+
+  <div id="lessons-container"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  DATA – 30 jours × 3 modules
+// ════════════════════════════════════════════
+const DAYS = [
+  // ───── JOUR 1 ─────
+  {
+    title: "Les fondations",
+    desc: "On pose les bases : écrire ton premier code Python, comprendre ce qu'est une base de données, et découvrir le Cloud.",
+    modules: [
+      {
+        id:"py", label:"Python", icon:"🐍",
+        time:"1h", level:"debutant",
+        content: `
+<h3>🐍 Python – Jour 1 : Ton premier programme</h3>
+<p>Python est l'un des langages les plus populaires au monde. Simple à lire, puissant à utiliser. Aujourd'hui, tu vas installer Python et écrire tes premières lignes de code.</p>
+
+<h4>1. Installation</h4>
+<p>Va sur <strong>python.org</strong> et télécharge Python 3.11+. Installe aussi <strong>VS Code</strong> (éditeur de code gratuit). Dans VS Code, installe l'extension <em>Python</em>.</p>
+
+<div class="info-box tip">
+  <div class="ib-title">💡 Astuce</div>
+  <div class="ib-body">Pendant l'installation Windows, coche <strong>"Add Python to PATH"</strong> — très important !</div>
+</div>
+
+<h4>2. Ton premier fichier</h4>
+<p>Crée un fichier <code>jour1.py</code> et écris ceci :</p>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span><span>jour1.py</span></div>
+  <pre># Mon premier programme Python
+print("Bonjour Wilson !")
+print("Je suis en train d'apprendre Python.")
+
+# Les variables stockent des données
+nom = "Wilson"
+age = 25
+print("Je m'appelle", nom, "et j'ai", age, "ans.")</pre>
+</div>
+<p>Lance avec : <code>python jour1.py</code> dans le terminal.</p>
+
+<h4>3. Les types de données</h4>
+<p>Python a plusieurs types fondamentaux :</p>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre># Entier (int)
+nombre = 42
+
+# Décimal (float)  
+prix = 9.99
+
+# Texte (str)
+message = "Hello"
+
+# Vrai/Faux (bool)
+actif = True
+
+# Vérifier le type
+print(type(nombre))   # &lt;class 'int'&gt;
+print(type(message))  # &lt;class 'str'&gt;</pre>
+</div>
+
+<h4>4. Opérations de base</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre>a = 10
+b = 3
+
+print(a + b)   # Addition : 13
+print(a - b)   # Soustraction : 7
+print(a * b)   # Multiplication : 30
+print(a / b)   # Division : 3.333...
+print(a // b)  # Division entière : 3
+print(a % b)   # Reste (modulo) : 1
+print(a ** b)  # Puissance : 1000</pre>
+</div>
+
+<h4>5. Demander une entrée à l'utilisateur</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre>prenom = input("Quel est ton prénom ? ")
+print("Bienvenue,", prenom, "!")
+
+age_str = input("Quel est ton âge ? ")
+age = int(age_str)  # Convertir texte en nombre
+annee_naissance = 2025 - age
+print("Tu es né en", annee_naissance)</pre>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">Crée un programme qui demande le nom et l'âge de l'utilisateur, puis affiche : <em>"Bonjour [nom] ! Dans 10 ans tu auras [age+10] ans."</em></div>
+</div>
+        `
+      },
+      {
+        id:"db", label:"Base de données", icon:"🗄️",
+        time:"1h", level:"debutant",
+        content: `
+<h3>🗄️ Bases de données – Jour 1 : C'est quoi une BDD ?</h3>
+<p>Une base de données, c'est un système pour stocker, organiser et retrouver des informations. Imagine un classeur super organisé que l'ordinateur peut lire en une fraction de seconde.</p>
+
+<h4>Pourquoi des bases de données ?</h4>
+<ul>
+  <li>Un fichier texte pour 1 million d'utilisateurs → lent et ingérable</li>
+  <li>Une BDD peut gérer des <strong>milliards de lignes</strong> avec une recherche en millisecondes</li>
+  <li>Elle garantit que les données sont <strong>cohérentes</strong> (pas de doublons, pas d'erreurs)</li>
+</ul>
+
+<h4>Les deux grandes familles</h4>
+<div class="code-block">
+  <div class="code-block-header"><span>SQL vs NoSQL</span></div>
+  <pre>SQL (Bases relationnelles)          NoSQL (Bases non-relationnelles)
+──────────────────────────────────  ──────────────────────────────────
+MySQL, PostgreSQL, SQLite           MongoDB, Redis, Firebase
+Données en tableaux (lignes/cols)   Données en documents JSON
+Relations entre tables              Flexible, pas de schéma fixe
+Idéal : données structurées         Idéal : données variables/rapides
+Exemple : banque, e-commerce        Exemple : réseau social, IoT</pre>
+</div>
+
+<h4>La structure d'une table SQL</h4>
+<p>Une table, c'est comme un tableau Excel. Chaque colonne = un champ. Chaque ligne = un enregistrement.</p>
+<div class="code-block">
+  <div class="code-block-header"><span>Table : utilisateurs</span></div>
+  <pre>┌────┬──────────┬─────────────────────┬──────┐
+│ id │   nom    │        email        │  age │
+├────┼──────────┼─────────────────────┼──────┤
+│  1 │  Wilson  │ wilson@email.com    │   25 │
+│  2 │  Marie   │ marie@email.com     │   30 │
+│  3 │  Jean    │ jean@email.com      │   22 │
+└────┴──────────┴─────────────────────┴──────┘
+
+id = Clé primaire (identifiant unique, jamais en double)</pre>
+</div>
+
+<h4>Installation : SQLite (déjà inclus dans Python !)</h4>
+<p>SQLite est parfait pour apprendre. Pas d'installation nécessaire — Python l'inclut nativement.</p>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span><span>premier_test.py</span></div>
+  <pre>import sqlite3
+
+# Créer/ouvrir une base de données
+conn = sqlite3.connect("ma_base.db")
+curseur = conn.cursor()
+
+print("Connexion réussie !")
+print("Version SQLite :", sqlite3.sqlite_version)
+
+conn.close()</pre>
+</div>
+
+<h4>Concepts clés à retenir</h4>
+<ul>
+  <li><strong>Table</strong> : tableau de données</li>
+  <li><strong>Ligne / Enregistrement</strong> : une entrée dans la table</li>
+  <li><strong>Colonne / Champ</strong> : une propriété</li>
+  <li><strong>Clé primaire (PRIMARY KEY)</strong> : identifiant unique</li>
+  <li><strong>SGBD</strong> : Système de Gestion de Base de Données</li>
+</ul>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">Lance le script Python ci-dessus. Ensuite, dessine sur papier une table <em>"films"</em> avec les colonnes : id, titre, réalisateur, année, note. Ajoute 3 films.</div>
+</div>
+        `
+      },
+      {
+        id:"cloud", label:"Cloud", icon:"☁️",
+        time:"1h", level:"debutant",
+        content: `
+<h3>☁️ Cloud Computing – Jour 1 : C'est quoi le Cloud ?</h3>
+<p>Le Cloud, c'est utiliser des ordinateurs et des services <strong>à distance via Internet</strong>, plutôt que d'avoir ta propre machine. Tu paies ce que tu consommes, comme l'électricité.</p>
+
+<h4>Avant le Cloud vs Après</h4>
+<div class="code-block">
+  <div class="code-block-header"><span>Comparaison</span></div>
+  <pre>AVANT (On-Premise)                    APRÈS (Cloud)
+─────────────────────────────────     ─────────────────────────────────
+Acheter des serveurs physiques        Louer des serveurs à la demande
+Coût initial énorme                   Payer à l'utilisation
+Maintenance par ton équipe            Gérée par AWS/Azure/GCP
+Capacité fixe (difficile à scaler)   Scale en quelques secondes
+Pannes = ton problème                 Haute disponibilité garantie</pre>
+</div>
+
+<h4>Les 3 grands fournisseurs</h4>
+<ul>
+  <li>🟠 <strong>AWS (Amazon Web Services)</strong> – Leader du marché, le plus complet</li>
+  <li>🔵 <strong>Microsoft Azure</strong> – Fort sur l'intégration Windows/Office</li>
+  <li>🔴 <strong>Google Cloud Platform (GCP)</strong> – Fort sur l'IA et les données</li>
+</ul>
+
+<h4>Les modèles de service</h4>
+<div class="code-block">
+  <div class="code-block-header"><span>IaaS / PaaS / SaaS</span></div>
+  <pre>IaaS – Infrastructure as a Service
+  → Tu loues des serveurs virtuels
+  → Tu gères l'OS, les apps, les données
+  → Exemple : AWS EC2, Azure VM
+
+PaaS – Platform as a Service  
+  → La plateforme est gérée pour toi
+  → Tu déploies juste ton code
+  → Exemple : Heroku, Google App Engine
+
+SaaS – Software as a Service
+  → L'application entière est fournie
+  → Tu l'utilises directement
+  → Exemple : Gmail, Dropbox, Notion</pre>
+</div>
+
+<h4>Pourquoi apprendre le Cloud ?</h4>
+<ul>
+  <li>📈 <strong>94% des entreprises</strong> utilisent le Cloud (2024)</li>
+  <li>💰 Les ingénieurs Cloud sont parmi les <strong>mieux payés</strong> du secteur</li>
+  <li>🌍 Tes apps peuvent être accessibles <strong>partout dans le monde</strong></li>
+  <li>🔐 Sécurité et sauvegardes <strong>automatiques</strong></li>
+</ul>
+
+<h4>Créer ton compte AWS Free Tier</h4>
+<p>AWS offre <strong>12 mois gratuits</strong> pour les nouveaux comptes avec beaucoup de services. Va sur <strong>aws.amazon.com</strong> → "Créer un compte gratuit".</p>
+
+<div class="info-box warning">
+  <div class="ib-title">⚠️ Important</div>
+  <div class="ib-body">AWS demande une carte bancaire pour vérification, mais ne débite pas si tu restes dans les limites du Free Tier. Configure des alertes de facturation dès la création !</div>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">1. Crée ton compte AWS Free Tier sur aws.amazon.com<br>2. Explore la console AWS — identifie 5 services différents<br>3. Cherche "qu'est-ce que IaaS PaaS SaaS" et lis un article</div>
+</div>
+        `
+      }
+    ]
+  },
+
+  // ───── JOUR 2 ─────
+  {
+    title: "Conditions, SQL et Régions Cloud",
+    desc: "On entre dans le vif : conditions en Python, premières requêtes SQL, et architecture cloud.",
+    modules: [
+      {
+        id:"py", label:"Python", icon:"🐍",
+        time:"1h", level:"debutant",
+        content: `
+<h3>🐍 Python – Jour 2 : Conditions & Logique</h3>
+<p>Les conditions permettent à ton programme de <strong>prendre des décisions</strong>. C'est la base de toute intelligence dans le code.</p>
+
+<h4>1. if / elif / else</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre>age = 20
+
+if age < 18:
+    print("Tu es mineur")
+elif age < 65:
+    print("Tu es adulte")
+else:
+    print("Tu es senior")
+
+# Résultat : "Tu es adulte"</pre>
+</div>
+
+<div class="info-box tip">
+  <div class="ib-title">💡 Indentation</div>
+  <div class="ib-body">En Python, l'indentation (les espaces) est <strong>obligatoire</strong>. Utilise 4 espaces ou une tabulation. C'est ce qui définit les blocs de code.</div>
+</div>
+
+<h4>2. Opérateurs de comparaison</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre>x = 10
+y = 20
+
+print(x == y)   # Égal ?          False
+print(x != y)   # Différent ?     True
+print(x < y)    # Inférieur ?     True
+print(x > y)    # Supérieur ?     False
+print(x <= 10)  # Inf. ou égal ?  True
+print(x >= 10)  # Sup. ou égal ?  True</pre>
+</div>
+
+<h4>3. Opérateurs logiques</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre>age = 25
+abonne = True
+
+# and : les DEUX doivent être vrais
+if age >= 18 and abonne:
+    print("Accès premium accordé")
+
+# or : AU MOINS UN doit être vrai
+if age < 18 or not abonne:
+    print("Accès limité")
+
+# not : inverse le résultat
+if not abonne:
+    print("Pas abonné")</pre>
+</div>
+
+<h4>4. Conditions dans des conditions (imbrication)</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre>note = int(input("Entre ta note (0-20) : "))
+
+if note >= 10:
+    if note >= 16:
+        print("Très bien !")
+    elif note >= 14:
+        print("Bien")
+    else:
+        print("Passable")
+else:
+    print("Aie, c'est insuffisant...")</pre>
+</div>
+
+<h4>5. L'opérateur ternaire (raccourci)</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre># Syntaxe : valeur_si_vrai if condition else valeur_si_faux
+statut = "majeur" if age >= 18 else "mineur"
+print(statut)</pre>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Mini-projet</div>
+  <div class="ib-body">Crée un <strong>calculateur d'IMC</strong> : demande le poids (kg) et la taille (m), calcule l'IMC (poids / taille²), et affiche : "Insuffisant" / "Normal" / "Surpoids" / "Obésité".</div>
+</div>
+        `
+      },
+      {
+        id:"db", label:"Base de données", icon:"🗄️",
+        time:"1h", level:"debutant",
+        content: `
+<h3>🗄️ Bases de données – Jour 2 : Premières requêtes SQL</h3>
+<p>SQL (Structured Query Language) est le langage pour <strong>parler</strong> à une base de données. Aujourd'hui on crée notre première table et on insère des données.</p>
+
+<h4>1. Créer une table – CREATE TABLE</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>CREATE TABLE utilisateurs (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom     TEXT    NOT NULL,
+    email   TEXT    UNIQUE NOT NULL,
+    age     INTEGER,
+    actif   BOOLEAN DEFAULT TRUE
+);</pre>
+</div>
+<ul>
+  <li><code>PRIMARY KEY</code> : identifiant unique, jamais nul</li>
+  <li><code>AUTOINCREMENT</code> : s'incrémente automatiquement</li>
+  <li><code>NOT NULL</code> : le champ est obligatoire</li>
+  <li><code>UNIQUE</code> : pas de doublon possible</li>
+  <li><code>DEFAULT</code> : valeur par défaut si non fournie</li>
+</ul>
+
+<h4>2. Insérer des données – INSERT INTO</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>-- Insérer un utilisateur
+INSERT INTO utilisateurs (nom, email, age) 
+VALUES ('Wilson', 'wilson@email.com', 25);
+
+-- Insérer plusieurs à la fois
+INSERT INTO utilisateurs (nom, email, age) VALUES
+('Marie',   'marie@email.com',  30),
+('Jean',    'jean@email.com',   22),
+('Sophie',  'sophie@email.com', 28);</pre>
+</div>
+
+<h4>3. Lire des données – SELECT</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>-- Tout sélectionner
+SELECT * FROM utilisateurs;
+
+-- Sélectionner des colonnes précises
+SELECT nom, email FROM utilisateurs;
+
+-- Avec une condition
+SELECT * FROM utilisateurs WHERE age > 25;
+
+-- Trier par âge
+SELECT * FROM utilisateurs ORDER BY age ASC;
+
+-- Limiter le nombre de résultats
+SELECT * FROM utilisateurs LIMIT 2;</pre>
+</div>
+
+<h4>4. En pratique avec Python + SQLite</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span><span>bdd_jour2.py</span></div>
+  <pre>import sqlite3
+
+conn = sqlite3.connect("ma_base.db")
+cur = conn.cursor()
+
+# Créer la table
+cur.execute("""
+CREATE TABLE IF NOT EXISTS utilisateurs (
+    id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom   TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    age   INTEGER
+)
+""")
+
+# Insérer des données
+cur.execute("INSERT OR IGNORE INTO utilisateurs (nom, email, age) VALUES (?, ?, ?)",
+            ("Wilson", "wilson@email.com", 25))
+cur.execute("INSERT OR IGNORE INTO utilisateurs (nom, email, age) VALUES (?, ?, ?)",
+            ("Marie", "marie@email.com", 30))
+
+conn.commit()  # IMPORTANT : sauvegarder les changements
+
+# Lire les données
+cur.execute("SELECT * FROM utilisateurs")
+for ligne in cur.fetchall():
+    print(ligne)
+
+conn.close()</pre>
+</div>
+
+<div class="info-box warning">
+  <div class="ib-title">⚠️ Toujours utiliser des paramètres ( ? )</div>
+  <div class="ib-body">Ne jamais écrire : <code>"INSERT ... VALUES ('" + nom + "')"</code> — c'est une faille de sécurité (injection SQL). Utilise toujours les <code>?</code> comme ci-dessus.</div>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">Lance le script Python. Ajoute 3 personnes de plus. Puis écris une requête SELECT pour n'afficher que les personnes de plus de 25 ans.</div>
+</div>
+        `
+      },
+      {
+        id:"cloud", label:"Cloud", icon:"☁️",
+        time:"1h", level:"debutant",
+        content: `
+<h3>☁️ Cloud Computing – Jour 2 : Régions, Zones et IAM</h3>
+<p>Aujourd'hui on comprend comment AWS est organisé géographiquement et comment gérer les accès de façon sécurisée.</p>
+
+<h4>1. Régions AWS</h4>
+<p>AWS possède des <strong>data centers partout dans le monde</strong>, regroupés en Régions.</p>
+<div class="code-block">
+  <div class="code-block-header"><span>Régions principales</span></div>
+  <pre>us-east-1      → Virginie du Nord (la plus ancienne, la moins chère)
+eu-west-3      → Paris 🇫🇷
+eu-central-1   → Francfort 🇩🇪
+ap-southeast-1 → Singapour 🇸🇬
+af-south-1     → Cape Town 🇿🇦
+
+Pourquoi ça compte ?
+→ Choisis la région la plus proche de tes utilisateurs
+→ Les prix varient selon les régions
+→ Certains services ne sont pas disponibles partout</pre>
+</div>
+
+<h4>2. Zones de disponibilité (AZ)</h4>
+<p>Chaque région contient plusieurs <strong>Zones de disponibilité</strong> (généralement 3). Ce sont des data centers physiquement séparés.</p>
+<div class="code-block">
+  <div class="code-block-header"><span>Exemple : Région Paris</span></div>
+  <pre>eu-west-3 (Paris)
+├── eu-west-3a  → Data center A
+├── eu-west-3b  → Data center B
+└── eu-west-3c  → Data center C
+
+Si eu-west-3a tombe en panne → les autres AZ prennent le relai
+→ Haute disponibilité garantie</pre>
+</div>
+
+<h4>3. IAM – Gestion des accès</h4>
+<p>IAM (Identity and Access Management) contrôle <strong>qui peut faire quoi</strong> sur AWS.</p>
+<ul>
+  <li><strong>Root Account</strong> : Le compte principal. Ne l'utilise JAMAIS pour le travail quotidien !</li>
+  <li><strong>Utilisateurs IAM</strong> : Comptes pour les personnes/applications</li>
+  <li><strong>Groupes</strong> : Ensemble d'utilisateurs avec les mêmes droits</li>
+  <li><strong>Politiques (Policies)</strong> : Règles qui définissent les permissions</li>
+  <li><strong>Rôles</strong> : Permissions temporaires pour des services</li>
+</ul>
+
+<h4>4. Créer ton utilisateur IAM (à faire maintenant)</h4>
+<div class="code-block">
+  <div class="code-block-header"><span>Étapes dans la console AWS</span></div>
+  <pre>1. Console AWS → Cherche "IAM" dans la barre de recherche
+2. Clique "Utilisateurs" → "Créer un utilisateur"
+3. Nom : "wilson-admin"
+4. Active "Accès console AWS"
+5. Permissions : Attache "AdministratorAccess"
+   (pour apprendre — en prod on donne le minimum)
+6. Télécharge les credentials (clés d'accès)
+7. Déconnecte-toi du root → reconnecte avec ton user IAM</pre>
+</div>
+
+<div class="info-box warning">
+  <div class="ib-title">🔐 Règle d'or</div>
+  <div class="ib-body">Active toujours le <strong>MFA (Multi-Factor Authentication)</strong> sur ton compte root. C'est le cadenas sur la porte principale.</div>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">1. Crée ton utilisateur IAM "wilson-admin"<br>2. Active le MFA sur le root<br>3. Installe AWS CLI : <code>pip install awscli</code><br>4. Configure avec <code>aws configure</code> et tes clés IAM</div>
+</div>
+        `
+      }
+    ]
+  },
+
+  // ───── JOUR 3 ─────
+  {
+    title: "Boucles, Filtres SQL & EC2",
+    desc: "Les boucles Python, les filtres avancés en SQL, et lancer ton premier serveur dans le cloud.",
+    modules: [
+      {
+        id:"py", label:"Python", icon:"🐍",
+        time:"1h", level:"debutant",
+        content: `
+<h3>🐍 Python – Jour 3 : Boucles</h3>
+<p>Les boucles répètent des actions. Elles sont partout dans la programmation : traiter des listes, envoyer des emails en masse, analyser des données…</p>
+
+<h4>1. La boucle for</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre># Parcourir une liste
+fruits = ["mangue", "ananas", "papaye"]
+for fruit in fruits:
+    print("J'aime le", fruit)
+
+# Boucler N fois avec range()
+for i in range(5):       # 0, 1, 2, 3, 4
+    print(i)
+
+for i in range(1, 6):    # 1, 2, 3, 4, 5
+    print(i)
+
+for i in range(0, 10, 2):  # 0, 2, 4, 6, 8 (pas de 2)
+    print(i)</pre>
+</div>
+
+<h4>2. La boucle while</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre>compteur = 0
+while compteur < 5:
+    print("Compteur :", compteur)
+    compteur += 1  # IMPORTANT : toujours modifier la condition !
+
+# Exemple pratique : demander jusqu'à obtenir une bonne réponse
+reponse = ""
+while reponse != "python":
+    reponse = input("Quel est le meilleur langage ? ").lower()
+print("Bonne réponse !")</pre>
+</div>
+
+<h4>3. break et continue</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre># break : stoppe la boucle
+for i in range(10):
+    if i == 5:
+        break  # Arrête à 5
+    print(i)   # Affiche 0, 1, 2, 3, 4
+
+# continue : saute cette itération
+for i in range(10):
+    if i % 2 == 0:
+        continue  # Saute les pairs
+    print(i)  # Affiche 1, 3, 5, 7, 9</pre>
+</div>
+
+<h4>4. Boucles imbriquées</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre># Table de multiplication
+for i in range(1, 4):
+    for j in range(1, 4):
+        print(f"{i} x {j} = {i*j}")
+    print("---")</pre>
+</div>
+
+<h4>5. enumerate() et zip()</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">python</span></div>
+  <pre># enumerate : avoir l'index en même temps
+langages = ["Python", "JavaScript", "SQL"]
+for index, lang in enumerate(langages):
+    print(f"{index+1}. {lang}")
+
+# zip : parcourir deux listes en parallèle
+noms   = ["Wilson", "Marie", "Jean"]
+scores = [95, 87, 92]
+for nom, score in zip(noms, scores):
+    print(f"{nom} a eu {score}/100")</pre>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">Crée un programme qui affiche la table de multiplication de 1 à 10 pour un chiffre choisi par l'utilisateur. Bonus : affiche une étoile (*) pour chaque multiple de 5.</div>
+</div>
+        `
+      },
+      {
+        id:"db", label:"Base de données", icon:"🗄️",
+        time:"1h", level:"debutant",
+        content: `
+<h3>🗄️ Bases de données – Jour 3 : Filtres et tri avancés</h3>
+<p>Aujourd'hui on maîtrise le filtrage des données. C'est l'essentiel du quotidien d'un développeur : retrouver exactement ce qu'on cherche.</p>
+
+<h4>1. WHERE avec plusieurs conditions</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>-- Utiliser AND et OR
+SELECT * FROM utilisateurs 
+WHERE age > 20 AND actif = TRUE;
+
+SELECT * FROM utilisateurs 
+WHERE age < 18 OR age > 60;
+
+-- NOT
+SELECT * FROM utilisateurs 
+WHERE NOT email LIKE '%@gmail.com';</pre>
+</div>
+
+<h4>2. LIKE – Recherche textuelle</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>-- % remplace n'importe quoi
+SELECT * FROM utilisateurs WHERE nom LIKE 'W%';      -- commence par W
+SELECT * FROM utilisateurs WHERE email LIKE '%@gmail%'; -- contient @gmail
+SELECT * FROM utilisateurs WHERE nom LIKE '%son';    -- finit par son
+
+-- _ remplace UN seul caractère
+SELECT * FROM utilisateurs WHERE nom LIKE 'Wi___n'; -- Wi + 3 chars + n</pre>
+</div>
+
+<h4>3. IN et BETWEEN</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>-- IN : dans une liste de valeurs
+SELECT * FROM utilisateurs WHERE age IN (20, 25, 30);
+
+-- NOT IN
+SELECT * FROM utilisateurs WHERE pays NOT IN ('France', 'Belgique');
+
+-- BETWEEN : entre deux valeurs (inclus)
+SELECT * FROM utilisateurs WHERE age BETWEEN 20 AND 30;
+
+-- Sur des dates aussi !
+SELECT * FROM commandes WHERE date_achat BETWEEN '2024-01-01' AND '2024-12-31';</pre>
+</div>
+
+<h4>4. ORDER BY et LIMIT</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>-- Trier par âge croissant
+SELECT * FROM utilisateurs ORDER BY age ASC;
+
+-- Décroissant
+SELECT * FROM utilisateurs ORDER BY age DESC;
+
+-- Trier par plusieurs colonnes
+SELECT * FROM utilisateurs ORDER BY nom ASC, age DESC;
+
+-- TOP 3 des plus jeunes
+SELECT * FROM utilisateurs ORDER BY age ASC LIMIT 3;
+
+-- Pagination : sauter les 10 premiers, prendre les 10 suivants
+SELECT * FROM utilisateurs LIMIT 10 OFFSET 10;</pre>
+</div>
+
+<h4>5. Fonctions d'agrégation</h4>
+<div class="code-block">
+  <div class="code-block-header"><span class="code-block-lang">sql</span></div>
+  <pre>SELECT COUNT(*)       FROM utilisateurs;            -- Nombre total
+SELECT COUNT(DISTINCT pays) FROM utilisateurs;      -- Pays uniques
+SELECT AVG(age)       FROM utilisateurs;            -- Moyenne d'âge
+SELECT MAX(age)       FROM utilisateurs;            -- Le plus âgé
+SELECT MIN(age)       FROM utilisateurs;            -- Le plus jeune
+SELECT SUM(solde)     FROM comptes;                 -- Somme des soldes</pre>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">Crée une table <code>produits</code> (id, nom, categorie, prix, stock). Insère 10 produits. Écris des requêtes pour : 1) Les produits de moins de 50€ 2) Les produits dont le nom contient "Pro" 3) Le produit le plus cher par catégorie.</div>
+</div>
+        `
+      },
+      {
+        id:"cloud", label:"Cloud", icon:"☁️",
+        time:"1h", level:"debutant",
+        content: `
+<h3>☁️ Cloud Computing – Jour 3 : EC2 – Ton premier serveur</h3>
+<p>EC2 (Elastic Compute Cloud) est le service de <strong>serveurs virtuels</strong> d'AWS. Aujourd'hui tu lances ta première machine dans le cloud !</p>
+
+<h4>1. C'est quoi une instance EC2 ?</h4>
+<p>Une instance EC2, c'est un ordinateur virtuel qui tourne dans un data center AWS. Tu choisis le système d'exploitation, la puissance, et tu peux le lancer en 60 secondes.</p>
+
+<h4>2. Types d'instances</h4>
+<div class="code-block">
+  <div class="code-block-header"><span>Familles d'instances</span></div>
+  <pre>t3.micro    → 2 vCPU, 1 GB RAM   (GRATUIT Free Tier ✓)
+t3.small    → 2 vCPU, 2 GB RAM
+t3.medium   → 2 vCPU, 4 GB RAM
+
+m6i.large   → Usage général (mémoire équilibrée)
+c6i.large   → Optimisé CPU (calcul intensif)
+r6i.large   → Optimisé RAM (bases de données)
+
+Naming : [famille][génération].[taille]
+t  = burstable (idéal pour apprendre)
+m  = general purpose
+c  = compute optimized
+r  = memory optimized</pre>
+</div>
+
+<h4>3. Lancer ta première instance (étapes)</h4>
+<div class="code-block">
+  <div class="code-block-header"><span>Console AWS → EC2</span></div>
+  <pre>1. Console AWS → "EC2" → "Lancer une instance"
+2. Nom : "mon-premier-serveur"
+3. AMI : Amazon Linux 2023 (Free Tier eligible)
+4. Type : t2.micro (Free Tier)
+5. Key pair : "Créer une nouvelle paire de clés"
+   → Nom : "ma-cle-wilson" → RSA → .pem
+   → TÉLÉCHARGE et garde précieusement ce fichier !
+6. Groupe de sécurité : autoriser SSH (port 22)
+   (restreins à ton IP si possible)
+7. Stockage : 8 GB (par défaut) → OK
+8. "Lancer l'instance" !</pre>
+</div>
+
+<h4>4. Se connecter en SSH</h4>
+<div class="code-block">
+  <div class="code-block-header"><span>Terminal / PowerShell</span></div>
+  <pre># Sur Mac/Linux :
+chmod 400 ma-cle-wilson.pem   # Sécuriser la clé
+ssh -i ma-cle-wilson.pem ec2-user@[IP_PUBLIQUE]
+
+# Sur Windows : utilise PuTTY ou le terminal Windows
+# (cherche "convertir .pem en .ppk avec PuTTYgen")
+
+# Une fois connecté, tu vois :
+#    __| __|_ )
+#    _|  _|   /  Amazon Linux
+#   ___|\___|___|
+
+# Mets à jour le système
+sudo yum update -y
+
+# Installe Python
+sudo yum install python3 -y
+python3 --version</pre>
+</div>
+
+<h4>5. Concepts importants</h4>
+<ul>
+  <li><strong>AMI</strong> (Amazon Machine Image) : le "modèle" de ton OS</li>
+  <li><strong>Security Group</strong> : le pare-feu de ton instance</li>
+  <li><strong>IP Publique</strong> : l'adresse pour accéder à ton serveur</li>
+  <li><strong>Elastic IP</strong> : IP fixe (l'IP publique change à chaque redémarrage)</li>
+  <li><strong>EBS</strong> : le disque dur de ton instance</li>
+</ul>
+
+<div class="info-box warning">
+  <div class="ib-title">💸 Évite les frais</div>
+  <div class="ib-body">Arrête ton instance quand tu ne l'utilises pas ! Console EC2 → sélectionne l'instance → "État de l'instance" → "Arrêter". L'arrêt ne génère pas de frais (sauf le stockage EBS).</div>
+</div>
+
+<div class="info-box practice">
+  <div class="ib-title">🏋️ Pratique</div>
+  <div class="ib-body">Lance une instance EC2 t2.micro, connecte-toi en SSH, et exécute : <code>echo "Hello from the cloud!" > hello.txt</code> puis <code>cat hello.txt</code>. Tu viens de faire tourner du code dans le cloud !</div>
+</div>
+        `
+      }
+    ]
+  },
+
+  // ── JOURS 4-30 (résumés) ──
+  {title:"Fonctions & UPDATE SQL & S3",desc:"Fonctions Python, modifier des données en SQL, et stocker des fichiers dans le cloud.",modules:[
+    {id:"py",label:"Python",icon:"🐍",time:"1h",level:"debutant",content:`<h3>🐍 Python – Jour 4 : Fonctions</h3><p>Les fonctions permettent de <strong>réutiliser du code</strong> sans le réécrire. C'est le principe DRY : Don't Repeat Yourself.</p><h4>Définir une fonction</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">python</span></div><pre>def saluer(nom):
+    message = f"Bonjour {nom} !"
+    return message
+
+resultat = saluer("Wilson")
+print(resultat)  # Bonjour Wilson !</pre></div><h4>Paramètres par défaut</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">python</span></div><pre>def saluer(nom, langue="fr"):
+    if langue == "fr":
+        return f"Bonjour {nom}"
+    elif langue == "en":
+        return f"Hello {nom}"
+
+print(saluer("Wilson"))        # Bonjour Wilson
+print(saluer("Wilson", "en")) # Hello Wilson</pre></div><h4>*args et **kwargs</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">python</span></div><pre>def additionner(*nombres):
+    return sum(nombres)
+
+print(additionner(1, 2, 3, 4))  # 10
+
+def profil(**infos):
+    for cle, valeur in infos.items():
+        print(f"{cle}: {valeur}")
+
+profil(nom="Wilson", age=25, ville="Paris")</pre></div><div class="info-box practice"><div class="ib-title">🏋️ Pratique</div><div class="ib-body">Crée une fonction <code>calculer_note</code> qui prend plusieurs notes en argument et retourne la moyenne, la note max et la note min.</div></div>`},
+    {id:"db",label:"Base de données",icon:"🗄️",time:"1h",level:"debutant",content:`<h3>🗄️ Bases de données – Jour 4 : UPDATE & DELETE</h3><p>Modifier et supprimer des données de façon sécurisée.</p><h4>UPDATE</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">sql</span></div><pre>-- Modifier un enregistrement
+UPDATE utilisateurs SET age = 26 WHERE id = 1;
+
+-- Modifier plusieurs colonnes
+UPDATE utilisateurs 
+SET age = 26, email = 'nouveau@email.com'
+WHERE nom = 'Wilson';
+
+-- ⚠️ Sans WHERE → modifie TOUT !
+UPDATE utilisateurs SET actif = TRUE; -- tous actifs</pre></div><h4>DELETE</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">sql</span></div><pre>-- Supprimer un enregistrement
+DELETE FROM utilisateurs WHERE id = 3;
+
+-- ⚠️ Sans WHERE → vide la table entière !
+DELETE FROM utilisateurs; -- DANGER !
+
+-- Supprimer et recréer une table (plus rapide)
+TRUNCATE TABLE utilisateurs; -- MySQL/PostgreSQL</pre></div><div class="info-box warning"><div class="ib-title">⚠️ Règle d'or</div><div class="ib-body">Toujours faire un <strong>SELECT</strong> avec le même WHERE avant un UPDATE ou DELETE, pour vérifier ce que tu vas modifier.</div></div><div class="info-box practice"><div class="ib-title">🏋️ Pratique</div><div class="ib-body">Reprends ta table utilisateurs : mets à jour l'âge de 2 personnes, puis supprime celle dont l'email ne contient pas '@'. Vérifie avec SELECT à chaque fois.</div></div>`},
+    {id:"cloud",label:"Cloud",icon:"☁️",time:"1h",level:"debutant",content:`<h3>☁️ Cloud Computing – Jour 4 : S3 – Stockage objet</h3><p>S3 (Simple Storage Service) est le service de stockage de fichiers d'AWS. Infiniment scalable, très fiable (99.999999999% de durabilité).</p><h4>Concepts S3</h4><ul><li><strong>Bucket</strong> : un "répertoire" S3 (nom globalement unique)</li><li><strong>Objet</strong> : n'importe quel fichier</li><li><strong>Clé</strong> : le chemin/nom de l'objet</li><li><strong>Région</strong> : où est stocké le bucket</li></ul><h4>Créer un bucket</h4><div class="code-block"><div class="code-block-header"><span>Console AWS</span></div><pre>1. Console → S3 → "Créer un bucket"
+2. Nom : "wilson-academy-[date]" (doit être unique mondial)
+3. Région : eu-west-3 (Paris)
+4. Bloquer l'accès public : ✓ (par défaut)
+5. Créer</pre></div><h4>Utiliser S3 avec Python (boto3)</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">python</span></div><pre>import boto3
+
+s3 = boto3.client('s3')
+
+# Uploader un fichier
+s3.upload_file('fichier.txt', 'mon-bucket', 'dossier/fichier.txt')
+
+# Lister les objets
+response = s3.list_objects_v2(Bucket='mon-bucket')
+for obj in response.get('Contents', []):
+    print(obj['Key'], obj['Size'])
+
+# Télécharger
+s3.download_file('mon-bucket', 'dossier/fichier.txt', 'local.txt')</pre></div><div class="info-box practice"><div class="ib-title">🏋️ Pratique</div><div class="ib-body">Crée un bucket S3, installe boto3 (<code>pip install boto3</code>), et upload un fichier texte avec Python. Vérifie dans la console que ton fichier est bien là !</div></div>`}
+  ]},
+  {title:"Listes & Jointures SQL & Lambda",desc:"Structures de données Python, relations entre tables, et fonctions serverless.",modules:[
+    {id:"py",label:"Python",icon:"🐍",time:"1h",level:"debutant",content:`<h3>🐍 Python – Jour 5 : Listes & Dictionnaires</h3><p>Les structures de données sont les conteneurs de l'information. Maîtrise les listes et dicos, tu maîtrises Python.</p><h4>Listes</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">python</span></div><pre>fruits = ["mangue", "ananas", "papaye", "fraise"]
+
+# Accès
+print(fruits[0])      # mangue (premier)
+print(fruits[-1])     # fraise (dernier)
+print(fruits[1:3])    # ["ananas", "papaye"]
+
+# Modifier
+fruits.append("kiwi")        # Ajouter à la fin
+fruits.insert(1, "banane")   # Insérer à l'index 1
+fruits.remove("ananas")      # Supprimer par valeur
+dernier = fruits.pop()       # Supprimer et retourner le dernier
+fruits.sort()                # Trier
+
+# List comprehension (puissant !)
+carres = [x**2 for x in range(1, 6)]  # [1, 4, 9, 16, 25]
+pairs = [x for x in range(20) if x % 2 == 0]</pre></div><h4>Dictionnaires</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">python</span></div><pre>personne = {
+    "nom": "Wilson",
+    "age": 25,
+    "langages": ["Python", "SQL"]
+}
+
+print(personne["nom"])           # Wilson
+print(personne.get("email", "Inconnu"))  # Inconnu (sans erreur)
+
+personne["ville"] = "Paris"      # Ajouter une clé
+personne["age"] = 26             # Modifier
+
+for cle, valeur in personne.items():
+    print(f"{cle} → {valeur}")</pre></div><div class="info-box practice"><div class="ib-title">🏋️ Mini-projet</div><div class="ib-body">Crée un gestionnaire de contacts : dictionnaire de personnes (nom → {email, tel, ville}). Fonctions pour ajouter, rechercher, modifier et supprimer un contact.</div></div>`},
+    {id:"db",label:"Base de données",icon:"🗄️",time:"1h",level:"intermediaire",content:`<h3>🗄️ Bases de données – Jour 5 : JOIN – Relier les tables</h3><p>Les jointures sont LA compétence clé du SQL. Elles permettent de combiner des données de plusieurs tables.</p><h4>Pourquoi relier des tables ?</h4><div class="code-block"><div class="code-block-header"><span>Structure relationnelle</span></div><pre>Table utilisateurs          Table commandes
+────────────────────        ──────────────────────────────
+id | nom     | email        id | user_id | produit | prix
+───┼─────────┼──────        ───┼─────────┼─────────┼─────
+1  | Wilson  | w@m.com      1  |    1    | iPhone  | 999
+2  | Marie   | m@m.com      2  |    1    | AirPods | 199
+                            3  |    2    | MacBook | 1299
+
+user_id dans commandes = id dans utilisateurs (clé étrangère)</pre></div><h4>INNER JOIN</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">sql</span></div><pre>-- Commandes AVEC le nom de l'utilisateur
+SELECT u.nom, c.produit, c.prix
+FROM commandes c
+INNER JOIN utilisateurs u ON c.user_id = u.id;
+
+-- Résultat :
+-- Wilson | iPhone  | 999
+-- Wilson | AirPods | 199
+-- Marie  | MacBook | 1299</pre></div><h4>LEFT JOIN</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">sql</span></div><pre>-- TOUS les utilisateurs, même sans commande
+SELECT u.nom, c.produit
+FROM utilisateurs u
+LEFT JOIN commandes c ON u.id = c.user_id;
+
+-- Si pas de commande → NULL dans la colonne produit</pre></div><div class="info-box practice"><div class="ib-title">🏋️ Pratique</div><div class="ib-body">Crée 3 tables : <code>etudiants</code>, <code>cours</code>, et <code>inscriptions</code> (table de liaison). Insère des données et écris une requête JOIN pour afficher : "Nom étudiant | Cours suivi | Note".</div></div>`},
+    {id:"cloud",label:"Cloud",icon:"☁️",time:"1h",level:"intermediaire",content:`<h3>☁️ Cloud Computing – Jour 5 : AWS Lambda – Serverless</h3><p>Lambda te permet d'exécuter du code <strong>sans gérer de serveur</strong>. Tu paies uniquement quand ton code s'exécute. C'est révolutionnaire.</p><h4>Comment ça marche ?</h4><div class="code-block"><div class="code-block-header"><span>Modèle Lambda</span></div><pre>Événement → Lambda s'exécute → Résultat
+    ↓
+Facturation : par invocation + durée d'exécution
+
+Free Tier : 1 million d'invocations/mois GRATUITES
+→ Parfait pour apprendre et les petits projets</pre></div><h4>Ta première fonction Lambda</h4><div class="code-block"><div class="code-block-header"><span class="code-block-lang">python</span></div><pre>import json
+
+def lambda_handler(event, context):
+    # 'event' contient les données d'entrée
+    nom = event.get('nom', 'Monde')
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps({
+            'message': f'Bonjour {nom} depuis Lambda !',
+            'input': event
+        })
+    }</pre></div><h4>Déployer dans la console AWS</h4><div class="code-block"><div class="code-block-header"><span>Étapes</span></div><pre>1. Console → Lambda → "Créer une fonction"
+2. "Créer à partir de zéro"
+3. Nom : "ma-premiere-lambda"
+4. Runtime : Python 3.12
+5. Colle le code ci-dessus
+6. "Déployer"
+7. "Tester" → Créer un événement test :
+   {"nom": "Wilson"}
+8. Lance le test → vois le résultat !</pre></div><div class="info-box practice"><div class="ib-title">🏋️ Pratique</div><div class="ib-body">Crée une Lambda qui reçoit deux nombres et retourne leur somme, différence, produit. Teste avec plusieurs événements différents.</div></div>`}
+  ]},
+];
+
+// Remplir jours 6-30 avec contenu générique progressif
+const TOPICS_PY = [
+  "Modules & packages","POO – Classes","Héritage & polymorphisme","Fichiers & exceptions","Pandas – intro","Pandas – analyse","NumPy & calcul","Requests & APIs","Automatisation","Projet Python final"
+];
+const TOPICS_DB = [
+  "GROUP BY & HAVING","Sous-requêtes","Vues (VIEW)","Index & optimisation","Transactions ACID","SQLAlchemy ORM","MongoDB – intro","MongoDB – CRUD","Conception ERD","Projet BDD final"
+];
+const TOPICS_CLOUD = [
+  "RDS – BDD cloud","VPC & Réseaux","Security Groups","Auto Scaling","Load Balancer","CloudWatch","IAM avancé","Docker intro","CI/CD GitHub Actions","Projet Cloud final"
+];
+
+for(let i=5;i<30;i++){
+  const ti = i-5;
+  const lvl = i < 15 ? "debutant" : "intermediaire";
+  DAYS.push({
+    title: `${TOPICS_PY[ti % 10]} · ${TOPICS_DB[ti % 10]} · ${TOPICS_CLOUD[ti % 10]}`,
+    desc: `Jour ${i+1} : approfondissement en Python, bases de données et Cloud.`,
+    modules:[
+      {id:"py",label:"Python",icon:"🐍",time:"1h",level:lvl,content:`<h3>🐍 Python – Jour ${i+1} : ${TOPICS_PY[ti%10]}</h3><p>Ce contenu est généré pour le Jour ${i+1}. En situation réelle, il contiendrait un cours complet sur <strong>${TOPICS_PY[ti%10]}</strong> avec exemples de code, explications détaillées et exercices pratiques.</p><div class="info-box tip"><div class="ib-title">📚 Progression</div><div class="ib-body">Tu arrives au jour ${i+1} — tu maîtrises déjà les bases ! Ce module va t'apporter des connaissances intermédiaires sur <strong>${TOPICS_PY[ti%10]}</strong>.</div></div><div class="info-box practice"><div class="ib-title">🏋️ Pratique du jour</div><div class="ib-body">Applique les concepts de <strong>${TOPICS_PY[ti%10]}</strong> dans un mini-projet en lien avec tes apprentissages précédents.</div></div>`},
+      {id:"db",label:"Base de données",icon:"🗄️",time:"1h",level:lvl,content:`<h3>🗄️ Bases de données – Jour ${i+1} : ${TOPICS_DB[ti%10]}</h3><p>Module complet sur <strong>${TOPICS_DB[ti%10]}</strong>.</p><div class="info-box practice"><div class="ib-title">🏋️ Pratique</div><div class="ib-body">Mets en pratique <strong>${TOPICS_DB[ti%10]}</strong> avec des exercices SQL progressifs.</div></div>`},
+      {id:"cloud",label:"Cloud",icon:"☁️",time:"1h",level:lvl,content:`<h3>☁️ Cloud – Jour ${i+1} : ${TOPICS_CLOUD[ti%10]}</h3><p>Module complet sur <strong>${TOPICS_CLOUD[ti%10]}</strong> dans l'écosystème AWS.</p><div class="info-box practice"><div class="ib-title">🏋️ Pratique</div><div class="ib-body">Configure et teste <strong>${TOPICS_CLOUD[ti%10]}</strong> dans ta console AWS.</div></div>`}
+    ]
+  });
+}
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+const SK = 'ta30j_v2';
+let state = JSON.parse(localStorage.getItem(SK) || '{}');
+// state[dayIdx] = { py: bool, db: bool, cloud: bool }
+let currentDay = 0;
+let currentMod = 'py';
+
+function save(){ localStorage.setItem(SK, JSON.stringify(state)); }
+function isDone(d,m){ return state[d]?.[m] === true; }
+function dayComplete(d){ const s=state[d]||{}; return s.py&&s.db&&s.cloud; }
+function totalDone(m){ return DAYS.filter((_,i)=>isDone(i,m)).length; }
+
+// ════════════════════════════════════════════
+//  HOME
+// ════════════════════════════════════════════
+function renderHome(){
+  // stats
+  const pyDone=totalDone('py'), dbDone=totalDone('db'), cloudDone=totalDone('cloud');
+  const total=pyDone+dbDone+cloudDone;
+  document.getElementById('gp-count').textContent=`${total}/90 modules`;
+  document.getElementById('gp-fill').style.width=`${(total/90)*100}%`;
+  document.getElementById('pill-py').textContent=`🐍 Python : ${pyDone}/30`;
+  document.getElementById('pill-db').textContent=`🗄️ DB : ${dbDone}/30`;
+  document.getElementById('pill-cloud').textContent=`☁️ Cloud : ${cloudDone}/30`;
+
+  // grid
+  const grid=document.getElementById('days-grid');
+  grid.innerHTML='';
+  // find first incomplete day
+  let firstIncomplete=-1;
+  for(let i=0;i<DAYS.length;i++){ if(!dayComplete(i)){firstIncomplete=i;break;} }
+
+  DAYS.forEach((day,i)=>{
+    const done=dayComplete(i);
+    const isActive=i===firstIncomplete;
+    const locked=i>0&&!dayComplete(i-1)&&!done;
+    const s=state[i]||{};
+    const div=document.createElement('div');
+    div.className=`day-card${done?' completed':''}${isActive?' active-day':''}${locked?' locked':''}`;
+    div.innerHTML=`
+      <div class="day-num">JOUR ${i+1}</div>
+      <div class="day-title">${day.title}</div>
+      <div class="day-modules">
+        <div class="day-mod py${s.py?' done':''}"></div>
+        <div class="day-mod db${s.db?' done':''}"></div>
+        <div class="day-mod cloud${s.cloud?' done':''}"></div>
+      </div>
+      <div class="day-check">✓</div>`;
+    if(!locked){
+      div.onclick=()=>openDay(i);
+    }
+    grid.appendChild(div);
+  });
+}
+
+// ════════════════════════════════════════════
+//  DAY VIEW
+// ════════════════════════════════════════════
+function openDay(idx){
+  currentDay=idx;
+  const day=DAYS[idx];
+
+  document.getElementById('dv-badge').textContent=`Jour ${idx+1}`;
+  document.getElementById('dv-title').textContent=day.title;
+  document.getElementById('dv-desc').textContent=day.desc;
+
+  // banner
+  const banner=document.getElementById('day-banner');
+  banner.className='day-complete-banner'+(dayComplete(idx)?' show':'');
+  document.getElementById('banner-next-btn').onclick=()=>{
+    if(idx+1<DAYS.length)openDay(idx+1);
+    else goHome();
+  };
+
+  // find first incomplete module for this day
+  const mods=['py','db','cloud'];
+  const s=state[idx]||{};
+  let first=mods.find(m=>!s[m])||'py';
+  currentMod=first;
+
+  renderTabs();
+  renderLesson();
+  showView('day-view');
+  window.scrollTo(0,0);
+}
+
+function renderTabs(){
+  const day=DAYS[currentDay];
+  const tabs=document.getElementById('mod-tabs');
+  tabs.innerHTML='';
+  day.modules.forEach(mod=>{
+    const done=isDone(currentDay,mod.id);
+    const btn=document.createElement('button');
+    btn.className=`mod-tab ${mod.id}${mod.id===currentMod?' active':''}`;
+    btn.innerHTML=`<div class="tab-dot"></div>${mod.icon} ${mod.label}${done?' <span class="tab-check">✓</span>':''}`;
+    btn.onclick=()=>{ currentMod=mod.id; renderTabs(); renderLesson(); };
+    tabs.appendChild(btn);
+  });
+}
+
+function renderLesson(){
+  const day=DAYS[currentDay];
+  const mod=day.modules.find(m=>m.id===currentMod);
+  const done=isDone(currentDay,currentMod);
+  const container=document.getElementById('lessons-container');
+
+  const colors={py:'var(--py)',db:'var(--db)',cloud:'var(--cloud)'};
+  const col=colors[currentMod];
+
+  container.innerHTML=`
+    <div class="lesson-panel active">
+      <div class="lesson-meta">
+        <span class="lm-time">⏱ ${mod.time}</span>
+        <span class="lm-level ${mod.level}">${mod.level==='debutant'?'🟢 Débutant':'🟡 Intermédiaire'}</span>
+      </div>
+      <div class="course-content">${mod.content}</div>
+    </div>
+    <div class="complete-wrap">
+      <span class="next-mod-hint">${done?'✅ Module complété':'Lis le cours puis marque-le comme terminé'}</span>
+      ${done
+        ? `<button class="complete-btn done-btn" disabled>✓ Terminé</button>`
+        : `<button class="complete-btn ${currentMod}" onclick="completeModule()">✓ Marquer comme terminé</button>`
+      }
+    </div>`;
+}
+
+function completeModule(){
+  if(!state[currentDay]) state[currentDay]={};
+  state[currentDay][currentMod]=true;
+  save();
+  renderTabs();
+  renderLesson();
+
+  // auto-advance to next incomplete
+  const mods=['py','db','cloud'];
+  const s=state[currentDay];
+  const next=mods.find(m=>!s[m]);
+
+  if(!next){
+    // day complete!
+    const banner=document.getElementById('day-banner');
+    banner.className='day-complete-banner show';
+    banner.scrollIntoView({behavior:'smooth',block:'nearest'});
+  } else {
+    setTimeout(()=>{ currentMod=next; renderTabs(); renderLesson(); window.scrollTo(0,200); },400);
+  }
+  renderHome();
+}
+
+// ════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){ renderHome(); showView('home'); window.scrollTo(0,0); }
+
+// init
+renderHome();
+</script>
+</body>
+</html>
